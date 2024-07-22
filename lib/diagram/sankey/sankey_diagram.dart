@@ -28,14 +28,17 @@ class SankeyDiagramPainter extends CustomPainter {
 
   List<SankeyDiagramNode> rootNodes;
 
-  static const Size nodeSize = Size(15, 50);
   static const double nodeRadius = 5;
 
   SankeyDiagramPainter(
     this.rootNodes
   );
   
-  void drawNode(Canvas canvas, Offset position) {
+  void drawNode(
+    Canvas canvas, 
+    Offset position,
+    Size nodeSize
+  ) {
     final paint = Paint()
     ..color = Colors.blue
     ..style = PaintingStyle.fill;
@@ -49,33 +52,53 @@ class SankeyDiagramPainter extends CustomPainter {
     canvas.drawRRect(RRect.fromRectAndRadius(rect, radius), paint);
   }
 
-  void drawNodeLink(Canvas canvas, Offset leftNodePosition, Offset rightNodePoition) {
-    final offset = Offset(nodeSize.width / 2, nodeSize.height / 2);
+  void drawNodeLink(
+    Canvas canvas, 
+    Offset leftNodePosition,
+    Size leftNodeSize, 
+    Offset rightNodePoition,
+    Size rightNodeSize
+  ) {
 
-    final midPosition = Offset(
-      (leftNodePosition.dx + rightNodePoition.dx) / 2,
-      (leftNodePosition.dy + rightNodePoition.dy) / 2
+    final midPositionX = (leftNodePosition.dx + rightNodePoition.dx) / 2;
+
+    final midSize = Size(
+      (leftNodeSize.width/2 + rightNodeSize.width/2) / 2, 
+      (leftNodeSize.height/2 + rightNodeSize.height/2) / 2
     );
 
-    Paint paint = Paint()
+    Paint topPaint = Paint()
       ..color = Colors.red
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = nodeSize.height;
+      ..style = PaintingStyle.fill;
     
     Path path = Path();
+
     path.moveTo(
-      leftNodePosition.dx + offset.dx + nodeRadius, leftNodePosition.dy + offset.dy
+      leftNodePosition.dx + leftNodeSize.width - nodeRadius, leftNodePosition.dy
     );
     path.quadraticBezierTo(
-      midPosition.dx + offset.dx, leftNodePosition.dy + offset.dy,
-      midPosition.dx + offset.dx, midPosition.dy + offset.dy
+      midPositionX - (midSize.width/2), leftNodePosition.dy,
+      midPositionX, (leftNodePosition.dy + rightNodePoition.dy) / 2
     );
     path.quadraticBezierTo(
-      midPosition.dx + offset.dx, rightNodePoition.dy + offset.dy,
-      rightNodePoition.dx + offset.dx - nodeRadius, rightNodePoition.dy + offset.dy
+      midPositionX + (midSize.width/2), rightNodePoition.dy,
+      rightNodePoition.dx + nodeRadius, rightNodePoition.dy
     );
 
-    canvas.drawPath(path, paint);
+    path.lineTo(
+      rightNodePoition.dx + nodeRadius, rightNodePoition.dy + rightNodeSize.height
+    );
+    path.quadraticBezierTo(
+      midPositionX + (midSize.width/2), rightNodePoition.dy + rightNodeSize.height,
+      midPositionX, ((leftNodePosition.dy + leftNodeSize.height) + (rightNodePoition.dy + rightNodeSize.height)) / 2
+    );
+    path.quadraticBezierTo(
+      midPositionX - (midSize.width/2), leftNodePosition.dy + leftNodeSize.height,
+      leftNodePosition.dx + leftNodeSize.width - nodeRadius, leftNodePosition.dy + leftNodeSize.height
+    );
+
+    path.close();
+    canvas.drawPath(path, topPaint);
   }
   
   @override
@@ -86,4 +109,3 @@ class SankeyDiagramPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 
 }
-
