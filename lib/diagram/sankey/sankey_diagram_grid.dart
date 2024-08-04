@@ -2,16 +2,16 @@ import 'dart:collection';
 
 import 'package:economy_indicator/diagram/sankey/sankey_diagram_node.dart';
 
-class SankeyDiagramDrawingNodeGrid {
+class SankeyDiagramGrid {
 
-  final LinkedList<SankeyDiagramGridCol> nodeGrid = LinkedList();
+  final LinkedList<SankeyDiagramGridCol> nodes = LinkedList();
 
-  SankeyDiagramDrawingNodeGrid (
+  SankeyDiagramGrid (
     List<SankeyDiagramNode> rootNodes
   ) {
-    nodeGrid.clear();
+    nodes.clear();
     SankeyDiagramGridCol rootCol = SankeyDiagramGridCol();
-    nodeGrid.add(rootCol);
+    nodes.add(rootCol);
 
     for (var it in rootNodes) {
       _fillGrid(it, rootCol, true);
@@ -45,5 +45,7 @@ class SankeyDiagramDrawingNodeGrid {
 final class SankeyDiagramGridCol extends LinkedListEntry<SankeyDiagramGridCol> {
 
   final List<SankeyDiagramNode> col = [];
+
+  int size() => col.length;
 
 }

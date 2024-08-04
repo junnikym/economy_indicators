@@ -7,23 +7,25 @@ class SankeyDiagramNode {
   final id = uuidGenerator.v4();
 
   final String name;
-  final double amount = 0.0;
+  final double amount;
 
   final List<SankeyDiagramNodeLinker> prev = [];
   final List<SankeyDiagramNodeLinker> next = [];
 
-  SankeyDiagramNode(this.name);
+  SankeyDiagramNode(this.name, this.amount);
 
-  void addPrev(SankeyDiagramNode node, double amount) {
+  SankeyDiagramNode addPrev(SankeyDiagramNode node, double amount) {
     prev.add(SankeyDiagramNodeLinker(node, amount));
     amount += amount;
+    return this;
   }
 
-  void addNext(SankeyDiagramNode node, double amount) {
+  SankeyDiagramNode addNext(SankeyDiagramNode node, double amount) {
     next.add(SankeyDiagramNodeLinker(node, amount));
     amount += amount;
+    return this;
   }
-  
+
 }
 
 class SankeyDiagramNodeLinker {
