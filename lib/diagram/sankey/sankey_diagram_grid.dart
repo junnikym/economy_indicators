@@ -24,7 +24,7 @@ class SankeyDiagramGrid {
     SankeyDiagramGridCol column,
     bool isAppendRight
   ) {
-    column.col.add(node);
+    column.add(node);
 
     (isAppendRight ? node.prev : node.next)
       .map((it)=> it.node)
@@ -36,16 +36,26 @@ class SankeyDiagramGrid {
           appender(nextCol);
         }
 
-        _fillGrid(nextNode, nextCol!, isAppendRight);
+        _fillGrid(nextNode, nextCol, isAppendRight);
       });
   }
 
 }
 
 final class SankeyDiagramGridCol extends LinkedListEntry<SankeyDiagramGridCol> {
-
-  final List<SankeyDiagramNode> col = [];
+  
+  final Map<String, SankeyDiagramNode> col = HashMap();
 
   int size() => col.length;
+
+  Iterable<SankeyDiagramNode> nodes() => col.values;
+
+  void add(SankeyDiagramNode node) {
+    if(col.containsKey(node.id)) {
+      return;
+    }
+
+    col[node.id] = node;
+  }
 
 }
