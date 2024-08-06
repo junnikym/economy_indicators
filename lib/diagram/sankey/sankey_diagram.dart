@@ -40,7 +40,7 @@ class SankeyDiagramPainter extends CustomPainter {
 
   static const double nodeRadius = 5;
 
-  final double horizontalBlankRatio = 0.05;
+  final double horizontalBlankRatio = 0.10;
 
   Map<String, SankeyDiagramNodePainter> nodePainters = HashMap();
 
@@ -168,17 +168,19 @@ class SankeyDiagramNodePainter {
     Canvas canvas, 
     SankeyDiagramNodePainter to
   ) {
-    final Offset leftNodePosition = position;
-    final Size leftNodeSize = size; 
-    final Offset rightNodePoition = to.position;
-    final Size rightNodeSize = to.size;
 
-    final midPositionX = (leftNodePosition.dx + rightNodePoition.dx) / 2;
+    final Offset leftNodePosition;
+    final Size leftNodeSize;
+    final Offset rightNodePoition;
+    final Size rightNodeSize;
 
-    final midSize = Size(
-      (leftNodeSize.width/2 + rightNodeSize.width/2) / 2, 
-      (leftNodeSize.height/2 + rightNodeSize.height/2) / 2
-    );
+    if(position.dx < to.position.dx) {
+      leftNodePosition = position;    leftNodeSize = size;
+      rightNodePoition = to.position; rightNodeSize = to.size;
+    } else {
+      leftNodePosition = to.position; leftNodeSize = to.size;
+      rightNodePoition = position;    rightNodeSize = size;
+    }
 
     final Random random = Random();
     Paint topPaint = Paint()
@@ -192,33 +194,55 @@ class SankeyDiagramNodePainter {
     
     Path path = Path();
 
+    // Draw Top Line
+
+    final Offset topStartPoint = Offset(leftNodePosition.dx + leftNodeSize.width - radius, leftNodePosition.dy);
+    final Offset topEndPoint = Offset(rightNodePoition.dx + radius, rightNodePoition.dy);
+    final Offset topMidPoint = _midpoint(topStartPoint, topEndPoint);
+    final Offset topFirstQuarterPoint = _midpoint(topStartPoint, topMidPoint);
+    final Offset topThirdQuarterPoint = _midpoint(topMidPoint, topEndPoint);
+    
     path.moveTo(
-      leftNodePosition.dx + leftNodeSize.width - radius, leftNodePosition.dy
+      topStartPoint.dx, topStartPoint.dy
     );
     path.quadraticBezierTo(
-      midPositionX - (midSize.width/2), leftNodePosition.dy,
-      midPositionX, (leftNodePosition.dy + rightNodePoition.dy) / 2
+      topFirstQuarterPoint.dx, topStartPoint.dy,
+      topMidPoint.dx, topMidPoint.dy
     );
     path.quadraticBezierTo(
-      midPositionX + (midSize.width/2), rightNodePoition.dy,
-      rightNodePoition.dx + radius, rightNodePoition.dy
+      topThirdQuarterPoint.dx, topEndPoint.dy,
+      topEndPoint.dx, topEndPoint.dy
     );
 
+    // Draw Bottom Line
+
+    final Offset bottomStartPoint = Offset(rightNodePoition.dx + radius, rightNodePoition.dy + rightNodeSize.height);
+    final Offset bottomEndPoint = Offset(leftNodePosition.dx + leftNodeSize.width - radius, leftNodePosition.dy + leftNodeSize.height);
+    final Offset bottomMidPoint = _midpoint(bottomStartPoint, bottomEndPoint);
+    final Offset bottomFirstQuarterPoint = _midpoint(bottomStartPoint, bottomMidPoint);
+    final Offset bottomThirdQuarterPoint = _midpoint(bottomMidPoint, bottomEndPoint);
+
     path.lineTo(
-      rightNodePoition.dx + radius, rightNodePoition.dy + rightNodeSize.height
-    );
-    
-    path.quadraticBezierTo(
-      midPositionX + (midSize.width/2), rightNodePoition.dy + rightNodeSize.height,
-      midPositionX, ((leftNodePosition.dy + leftNodeSize.height) + (rightNodePoition.dy + rightNodeSize.height)) / 2
+      bottomStartPoint.dx, bottomStartPoint.dy
     );
     path.quadraticBezierTo(
-      midPositionX - (midSize.width/2), leftNodePosition.dy + leftNodeSize.height,
-      leftNodePosition.dx + leftNodeSize.width - radius, leftNodePosition.dy + leftNodeSize.height
+      bottomFirstQuarterPoint.dx, bottomStartPoint.dy,
+      bottomMidPoint.dx, bottomMidPoint.dy
+    );
+    path.quadraticBezierTo(
+      bottomThirdQuarterPoint.dx, bottomEndPoint.dy,
+      bottomEndPoint.dx, bottomEndPoint.dy
     );
 
     path.close();
     canvas.drawPath(path, topPaint);
+  }
+
+  Offset _midpoint(Offset from, Offset to) {
+    return Offset(
+      (from.dx + to.dx) / 2, 
+      (from.dy + to.dy) / 2
+    );
   }
 
 }
